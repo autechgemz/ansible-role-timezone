@@ -1,0 +1,11 @@
+---
+
+timezone_package_ensure: 'present'
+
+timezone_setup_legacy: true
+
+timezone: "Asia/Tokyo"
+
+timezone_localrtc: false
+
+timezone_debug: false
