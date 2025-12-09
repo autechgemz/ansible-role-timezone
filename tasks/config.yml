@@ -7,53 +7,54 @@
     - timezone_config
     - timezone
   block:
-  - name: Check current timezone
-    when: timezone_setup_legacy is defined and timezone_setup_legacy
-    ansible.builtin.shell: >
-      set -o pipefail && LANG=C timedatectl status | grep -E 'Time zone' | awk '{print $3}' | grep -E '{{ timezone }}'
-    register: timezone_results
-    changed_when: false
-    failed_when: false
 
-  - name: Debug timezone_results
-    ansible.builtin.debug:
-      var: timezone_results['stdout']
-    when: timezone_debug is defined and timezone_debug
-  - name: Debug timezone_results
-    ansible.builtin.debug:
-      var: timezone_results
-    when: timezone_debug is defined and timezone_debug
+    - name: Check current timezone
+      when: timezone_setup_legacy is defined and timezone_setup_legacy
+      ansible.builtin.shell: >
+        set -o pipefail && LANG=C timedatectl status | grep -E 'Time zone' | awk '{print $3}' | grep -E '{{ timezone }}'
+      register: timezone_results
+      changed_when: false
+      failed_when: false
 
-  - name: Set timezone - legacy
-    when: timezone_setup_legacy is defined and timezone_setup_legacy
-    ansible.builtin.shell: >
-      LANG=C timedatectl set-timezone {{ timezone }}
-    changed_when: timezone_results.rc == 1
-  - name: Set timezone - community
-    when: timezone_setup_legacy is defined and not timezone_setup_legacy
-    community.general.timezone:
-      name: "{{ timezone }}"
+    - name: Debug timezone_results
+      ansible.builtin.debug:
+        var: timezone_results['stdout']
+      when: timezone_debug is defined and timezone_debug
+    - name: Debug timezone_results
+      ansible.builtin.debug:
+        var: timezone_results
+      when: timezone_debug is defined and timezone_debug
 
-  - name: Check RTC timezone
-    ansible.builtin.shell: >
-      set -o pipefail && LANG=C timedatectl status | grep -E 'RTC in local TZ' | awk '{print $5}'
-    register: rtctime_results
-    changed_when: false
-    failed_when: false
+    - name: Set timezone - legacy
+      when: timezone_setup_legacy is defined and timezone_setup_legacy
+      ansible.builtin.shell: >
+        LANG=C timedatectl set-timezone {{ timezone }}
+      changed_when: timezone_results.rc == 1
+    - name: Set timezone - community
+      when: timezone_setup_legacy is defined and not timezone_setup_legacy
+      community.general.timezone:
+        name: "{{ timezone }}"
 
-  - name: Debug rtctime_results
-    ansible.builtin.debug:
-      var: rtctime_results.stdout|bool|int
-    when: timezone_debug is defined and timezone_debug
-  - name: Debug timezone_localrtc
-    ansible.builtin.debug:
-      var: timezone_localrtc|bool|int
-    when: timezone_debug is defined and timezone_debug
+    - name: Check RTC timezone
+      ansible.builtin.shell: >
+        set -o pipefail && LANG=C timedatectl status | grep -E 'RTC in local TZ' | awk '{print $5}'
+      register: rtctime_results
+      changed_when: false
+      failed_when: false
 
-  - name: Set RTC clock timezone
-    when:
-      - timezone_localrtc is defined
-      - rtctime_results.stdout is defined
-    ansible.builtin.shell: >
-      LANG=C timedatectl set-local-rtc {{ timezone_localrtc | bool | int }}
-    changed_when: rtctime_results.stdout|bool|int != timezone_localrtc|bool|int
+    - name: Debug rtctime_results
+      ansible.builtin.debug:
+        var: rtctime_results.stdout|bool|int
+      when: timezone_debug is defined and timezone_debug
+    - name: Debug timezone_localrtc
+      ansible.builtin.debug:
+        var: timezone_localrtc|bool|int
+      when: timezone_debug is defined and timezone_debug
+
+    - name: Set RTC clock timezone
+      when:
+        - timezone_localrtc is defined
+        - rtctime_results.stdout is defined
+      ansible.builtin.shell: >
+        LANG=C timedatectl set-local-rtc {{ timezone_localrtc | bool | int }}
+      changed_when: rtctime_results.stdout|bool|int != timezone_localrtc|bool|int
