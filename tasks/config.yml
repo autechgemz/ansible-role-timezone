@@ -37,7 +37,7 @@
         timezone_rtclocal_target: "{{ 1 if (timezone_localrtc | default(false) | bool) else 0 }}"
 
     - name: Output RTC localtime
-      when: timezone_debug | default(false)
+      when: timezone_debug | default(false) | bool
       ansible.builtin.debug:
         msg:
           - "Current TZ = {{ timezone_rtclocal_current }}"
