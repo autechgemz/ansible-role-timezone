@@ -9,7 +9,7 @@
   block:
 
     - name: Check current timezone
-      when: timezone_setup_legacy is defined and timezone_setup_legacy
+      when: timezone_setup_legacy is defined and timezone_setup_legacy | bool
       ansible.builtin.shell: >
         set -o pipefail && LANG=C timedatectl status | grep -E 'Time zone' | awk '{print $3}' | grep -E '{{ timezone }}'
       register: timezone_results
@@ -19,19 +19,19 @@
     - name: Debug timezone_results
       ansible.builtin.debug:
         var: timezone_results['stdout']
-      when: timezone_debug is defined and timezone_debug
+      when: timezone_debug is defined and timezone_debug | bool
     - name: Debug timezone_results
       ansible.builtin.debug:
         var: timezone_results
       when: timezone_debug is defined and timezone_debug
 
     - name: Set timezone - legacy
-      when: timezone_setup_legacy is defined and timezone_setup_legacy
+      when: timezone_setup_legacy is defined and timezone_setup_legacy | bool
       ansible.builtin.shell: >
         LANG=C timedatectl set-timezone {{ timezone }}
       changed_when: timezone_results.rc == 1
     - name: Set timezone - community
-      when: timezone_setup_legacy is defined and not timezone_setup_legacy
+      when: timezone_setup_legacy is defined and not timezone_setup_legacy | bool
       community.general.timezone:
         name: "{{ timezone }}"
 
@@ -45,11 +45,11 @@
     - name: Debug rtctime_results
       ansible.builtin.debug:
         var: rtctime_results.stdout|bool|int
-      when: timezone_debug is defined and timezone_debug
+      when: timezone_debug is defined and timezone_debug | bool
     - name: Debug timezone_localrtc
       ansible.builtin.debug:
         var: timezone_localrtc|bool|int
-      when: timezone_debug is defined and timezone_debug
+      when: timezone_debug is defined and timezone_debug | bool
 
     - name: Set RTC clock timezone
       when:
@@ -58,3 +58,4 @@
       ansible.builtin.shell: >
         LANG=C timedatectl set-local-rtc {{ timezone_localrtc | bool | int }}
       changed_when: rtctime_results.stdout|bool|int != timezone_localrtc|bool|int
+
