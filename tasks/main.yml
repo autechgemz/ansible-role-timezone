@@ -9,7 +9,7 @@
   - name: Set dependency variables
     ansible.builtin.include_vars: "{{ item }}"
     loop:
-      - "{{ ansible_os_family }}.yml"
+      - "{{ ansible_facts.os_family }}.yml"
 
   - name: Install Tasks
     ansible.builtin.import_tasks: install.yml
